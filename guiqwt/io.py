@@ -245,13 +245,22 @@ def _import_dcm():
     import logging
     logger = logging.getLogger("pydicom")
     logger.setLevel(logging.CRITICAL)
-    import dicom  # analysis:ignore
+    try:
+        import dicom as pydicom # analysis:ignore
+    except ImportError:
+        import pydicom # analysis:ignore
     logger.setLevel(logging.WARNING)
 
 def _imread_dcm(filename):
     """Open DICOM image with pydicom and return a NumPy array"""
-    import dicom
-    dcm = dicom.ReadFile(filename)
+    try:
+        import dicom as pydicom # analysis:ignore
+    except ImportError:
+        import pydicom # analysis:ignore
+    try:
+        dcm = dicom.ReadFile(filename) # for pydicom < 1.0.0
+    except AttributeError:
+        dcm = pydicom.read_file(filename) # for pydicom >= 1.0.0
     # **********************************************************************
     # The following is necessary until pydicom numpy support is improved:
     # (after that, a simple: 'arr = dcm.PixelArray' will work the same)
